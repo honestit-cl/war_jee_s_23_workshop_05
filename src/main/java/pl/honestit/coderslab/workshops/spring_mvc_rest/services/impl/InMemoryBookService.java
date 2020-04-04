@@ -1,5 +1,7 @@
 package pl.honestit.coderslab.workshops.spring_mvc_rest.services.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import pl.honestit.coderslab.workshops.spring_mvc_rest.exceptions.ResourceNotFoundException;
@@ -14,9 +16,12 @@ import java.util.List;
 @Primary
 public class InMemoryBookService implements BookService {
 
+    private static final Logger log = LoggerFactory.getLogger(InMemoryBookService.class);
+
     private final List<Book> list;
 
     public InMemoryBookService() {
+        log.info("Tworzenie listy książek...");
         list = new ArrayList<>();
         list.add(new Book(1L, "9788324631766", "Thinking in Java", "Bruce Eckel",
                 "Helion", "programming"));
@@ -24,41 +29,63 @@ public class InMemoryBookService implements BookService {
                 "Sierra Kathy, Bates Bert", "Helion", "programming"));
         list.add(new Book(3L, "9780130819338", "Java 2. Podstawy",
                 "Cay Horstmann, Gary Cornell", "Helion", "programming"));
+        log.info("Utworzono listę książek: {} ", list);
     }
 
-    public List<Book> getList() {
+    @Override
+    public List<Book> getBooks() {
         return list;
     }
 
-    public Book getBookById(Long id) {
-        return list.stream()
-                .filter(book -> book.getId().equals(id))
+    @Override
+    public Book getBookById(Long bookId) {
+        log.debug("Pobieranie książki o id: {}", bookId);
+        Book foundBook = list.stream()
+                .filter(book -> book.getId().equals(bookId))
                 .findFirst()
                 .orElseThrow(ResourceNotFoundException::new);
+        log.debug("Znalezion książka: {}", foundBook);
+        return foundBook;
     }
 
-    public void addBook(Book added) {
-        list.stream()
+    @Override
+    public Book addBook(Book bookToAdd) {
+        log.debug("Dodawanie książki: {}", bookToAdd);
+        Long nextId = list.stream()
                 .map(Book::getId)
                 .sorted((Comparator<Long>) Comparator.naturalOrder().reversed())
                 .limit(1)
                 .map(id -> id + 1)
-                .map(nextId -> { added.setId(nextId); return added;})
-                .forEach(list::add);
+                .findFirst().get();
+        log.debug("Ustalone id dla książki: {}", nextId);
+        bookToAdd.setId(nextId);
+        list.add(bookToAdd);
+        return bookToAdd;
     }
 
-    public void updateBook(Book updated) {
+    @Override
+    public void updateBook(Book bookToUpdated) {
+        log.debug("Aktualizacja książki: {}", bookToUpdated);
+        log.debug("Liczba książek przed aktualizacją: {}", list.size());
         list.stream()
-                .filter(book -> book.getId().equals(updated.getId()))
+                .filter(book -> book.getId().equals(bookToUpdated.getId()))
+                .map(list::indexOf)
                 .findFirst()
-                .map(book -> updated)
-                .ifPresentOrElse(list::add, ResourceNotFoundException::new);
+                .ifPresentOrElse(index -> list.set(index, bookToUpdated), () -> {
+                    throw new ResourceNotFoundException();
+                });
+        log.debug("Lista książek po aktualizacji: {}", list.size());
     }
 
-    public void deleteBook(Long id) {
+    @Override
+    public void deleteBook(Long bookId) {
+        log.debug("Liczba książek przed usunięciem: {}", list.size());
         list.stream()
-                .filter(book -> book.getId().equals(id))
+                .filter(book -> book.getId().equals(bookId))
                 .findFirst()
-                .ifPresentOrElse(list::remove, ResourceNotFoundException::new);
+                .ifPresentOrElse(list::remove, () -> {
+                    throw new ResourceNotFoundException();
+                });
+        log.debug("Liczba książek po usunięciu: {}", list.size());
     }
 }
