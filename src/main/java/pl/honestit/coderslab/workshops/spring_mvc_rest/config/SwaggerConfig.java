@@ -27,7 +27,7 @@ public class SwaggerConfig {
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class)) // Określamy rodzaj klas do wyszukania
-                .paths(PathSelectors.ant("/api/**")) // Określamy warunki ścieżek, które uwzględniamy w dokumentacji
+                .paths(PathSelectors.ant("/**")) // Określamy warunki ścieżek, które uwzględniamy w dokumentacji
                 .build()
                 .apiInfo(apiInfo);
 

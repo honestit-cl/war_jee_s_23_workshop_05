@@ -7,7 +7,7 @@ import pl.honestit.coderslab.workshops.spring_mvc_rest.model.Book;
 import pl.honestit.coderslab.workshops.spring_mvc_rest.services.BookService;
 
 @RestController
-@RequestMapping("/api/books")
+@RequestMapping("/books")
 public class BookController {
 
     private final BookService bookService;
@@ -15,6 +15,5 @@ public class BookController {
     public BookController(BookService bookService) {
         this.bookService = bookService;
     }
-
 
 }
