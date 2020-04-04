@@ -16,14 +16,5 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    @GetMapping(value = "/hello", produces = "application/json;charset=UTF-8")
-    public String sayHelloInJSON() {
-        return "{ \"message\": \"Hello, world\"}";
-    }
 
-    @GetMapping("/hello-book")
-    public Book showBookInJSON() {
-        Book sampleBook = new Book(1L, "898989:909090", "Książka o JSONach", "CodersLab", "CodersLab", "PDF");
-        return sampleBook;
-    }
 }
